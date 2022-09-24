@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- the xml file is created By Dhruva for beans via spring configuration -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd 
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/tx
+    https://www.springframework.org/tx/spring-tx.xsd">
+
+	<!-- to enable the transaction -->
+	<tx:annotation-driven />
+
+	<!-- we need to do bean configuration for Spring with ORM -->
+
+	<!-- data source is needed to configure the property for local session factory 
+		bean -->
+	<bean
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+		name="ds">
+		<property name="driverClassName"
+			value="com.mysql.jdbc.Driver" />
+		<property name="url"
+			value="jdbc:mysql://localhost:3306/springjdbc?useSSL=false&amp;serverTimezone=UTC" />
+		<property name="username" value="root" />
+		<property name="password" value="a5@2K414*" />
+	</bean>
+	<!-- local session factory bean(search in java by pressing ctrl + shift 
+		+ t) is required to set the property for hibernate template -->
+	<bean
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean"
+		name="factory">
+		<property name="dataSource" ref="ds"></property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.hbm2dll.auto">update</prop>
+			</props>
+		</property>
+
+		<!-- we need annotated classes -->
+		<property name="annotatedClasses">
+			<list>
+				<value>com.spring.orm.entities.Student</value>
+			</list>
+		</property>
+
+	</bean>
+
+	<!-- we need to pass the object of hibernate template to student dao -->
+	<bean class="org.springframework.orm.hibernate5.HibernateTemplate"
+		name="hibertemp">
+		<property name="sessionFactory" ref="factory"></property>
+	</bean>
+
+	<bean class="com.spring.orm.dao.studentDao" name="studentDao">
+		<property name="hibernatetemplate" ref="hibertemp"></property>
+		<!-- hibertemp object will be set in this bean we have pass the the property 
+			for HibernateTemplate hibernatetemplate from student dao.java -->
+	</bean>
+
+	<bean id="txnManagerBean" name ="transactionManager"
+		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="factory"></property>
+	</bean>
+</beans>
